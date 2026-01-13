@@ -1,26 +1,227 @@
 @import "tailwindcss";
 
+/* ============== CSS Variables ============== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Egyptian Blue inspired palette */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+
+  --primary: 213 94% 42%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+
+  --accent: 45 93% 47%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 213 94% 42%;
+
+  --radius: 0.5rem;
+
+  /* Success, Warning, Info colors */
+  --success: 142 76% 36%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 0%;
+  --info: 199 89% 48%;
+  --info-foreground: 0 0% 100%;
 }
 
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+
+  --primary: 213 94% 58%;
+  --primary-foreground: 222.2 84% 4.9%;
+
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+
+  --accent: 45 93% 47%;
+  --accent-foreground: 210 40% 98%;
+
+  --destructive: 0 62.8% 50.6%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 213 94% 58%;
+}
+
+/* ============== Tailwind Theme ============== */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-info: hsl(var(--info));
+  --color-info-foreground: hsl(var(--info-foreground));
+
+  /* Fonts */
+  --font-cairo: var(--font-cairo), 'Cairo', 'Noto Sans Arabic', sans-serif;
+  --font-inter: var(--font-inter), 'Inter', system-ui, sans-serif;
+
+  /* Border radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============== Base Styles ============== */
+* {
+  border-color: hsl(var(--border));
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* ============== RTL Support ============== */
+[dir="rtl"] {
+  font-family: var(--font-cairo);
+}
+
+[dir="ltr"] {
+  font-family: var(--font-inter);
+}
+
+/* Font classes */
+.font-cairo {
+  font-family: var(--font-cairo);
+}
+
+.font-inter {
+  font-family: var(--font-inter);
+}
+
+/* Logical properties for RTL/LTR */
+.ms-auto { margin-inline-start: auto; }
+.me-auto { margin-inline-end: auto; }
+.ps-1 { padding-inline-start: 0.25rem; }
+.pe-1 { padding-inline-end: 0.25rem; }
+.ps-2 { padding-inline-start: 0.5rem; }
+.pe-2 { padding-inline-end: 0.5rem; }
+.ps-3 { padding-inline-start: 0.75rem; }
+.pe-3 { padding-inline-end: 0.75rem; }
+.ps-4 { padding-inline-start: 1rem; }
+.pe-4 { padding-inline-end: 1rem; }
+.ps-6 { padding-inline-start: 1.5rem; }
+.pe-6 { padding-inline-end: 1.5rem; }
+
+/* Keep numbers LTR in Arabic context */
+.number-ltr {
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
+/* Currency and amounts should stay LTR even in RTL */
+[dir="rtl"] .amount,
+[dir="rtl"] .currency,
+[dir="rtl"] .price {
+  direction: ltr;
+  unicode-bidi: embed;
+  text-align: right;
+}
+
+/* ============== Scrollbar Styling ============== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* ============== Print Styles ============== */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  /* Keep RTL for Arabic printing */
+  [dir="rtl"] {
+    direction: rtl;
+  }
+}
+
+/* ============== Animation ============== */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
