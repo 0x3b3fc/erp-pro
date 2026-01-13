@@ -1,6 +1,7 @@
 import { Cairo, Inter } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
+import { UnregisterServiceWorker } from '@/components/scripts/unregister-sw';
 import '@/app/globals.css';
 
 const cairo = Cairo({
@@ -27,13 +28,17 @@ export default function AdminRootLayout({
 }) {
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
-      <body className={`min-h-screen bg-background antialiased ${cairo.variable} font-cairo`}>
+      <body 
+        className={`min-h-screen bg-background antialiased ${cairo.variable} font-cairo`}
+        suppressHydrationWarning
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
+          <UnregisterServiceWorker />
           {children}
           <Toaster position="top-left" richColors closeButton />
         </ThemeProvider>

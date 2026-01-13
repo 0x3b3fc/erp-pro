@@ -24,7 +24,6 @@ import {
 } from '@/components/ui/table';
 import { ArrowRight, Save, Loader2, Trash2, Eye, Users, FileText, Package } from 'lucide-react';
 import { toast } from 'sonner';
-import { toast } from 'sonner';
 
 const planLabels: Record<string, string> = {
   STARTER: 'مجاني',

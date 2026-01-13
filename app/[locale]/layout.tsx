@@ -8,6 +8,7 @@ import { Toaster } from 'sonner';
 import { locales, type Locale, getDirection } from '@/lib/i18n/config';
 import { cn } from '@/lib/utils/cn';
 import { SessionProvider } from '@/components/providers/session-provider';
+import { UnregisterServiceWorker } from '@/components/scripts/unregister-sw';
 
 // Arabic font
 const cairo = Cairo({
@@ -53,6 +54,7 @@ export default async function LocaleLayout({
           isRTL ? cairo.variable : inter.variable,
           isRTL ? 'font-cairo' : 'font-inter'
         )}
+        suppressHydrationWarning
       >
         <SessionProvider>
           <ThemeProvider
@@ -61,6 +63,7 @@ export default async function LocaleLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <UnregisterServiceWorker />
             <NextIntlClientProvider messages={messages}>
               {children}
               <Toaster
