@@ -138,7 +138,7 @@ export default function TenantsPage() {
           <h1 className="text-2xl font-bold text-white">إدارة الشركات</h1>
           <p className="text-slate-400">عرض وإدارة جميع الشركات المسجلة</p>
         </div>
-        <Button>
+        <Button onClick={() => router.push('/admin/tenants/new')}>
           <Plus className="h-4 w-4 me-2" />
           إضافة شركة
         </Button>
@@ -234,15 +234,9 @@ export default function TenantsPage() {
                           variant="ghost"
                           size="sm"
                           className="text-slate-300 hover:text-white"
+                          onClick={() => router.push(`/admin/tenants/${tenant.id}`)}
                         >
                           <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-slate-300 hover:text-white"
-                        >
-                          <Settings className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>

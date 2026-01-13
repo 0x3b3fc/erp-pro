@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -12,8 +14,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, Shield, Loader2 } from 'lucide-react';
+import { Search, Shield, Loader2, Plus, Eye, Edit, Trash2 } from 'lucide-react';
 import { getSystemAdmins } from '@/lib/auth/admin-actions';
+import { toast } from 'sonner';
 
 type SystemAdmin = {
   id: string;
@@ -32,6 +35,7 @@ const roleLabels: Record<string, string> = {
 };
 
 export default function AdminUsersPage() {
+  const router = useRouter();
   const [admins, setAdmins] = useState<SystemAdmin[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -60,11 +64,38 @@ export default function AdminUsersPage() {
     return date.toLocaleDateString('ar-EG');
   };
 
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`هل أنت متأكد من حذف ${name}؟`)) return;
+
+    try {
+      const res = await fetch(`/api/admin/admins/${id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success('تم حذف المدير بنجاح');
+        fetchAdmins();
+      } else {
+        toast.error(data.error || 'حدث خطأ');
+      }
+    } catch (error) {
+      toast.error('حدث خطأ');
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">مديري النظام</h1>
-        <p className="text-slate-400">عرض وإدارة حسابات مديري النظام</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">مديري النظام</h1>
+          <p className="text-slate-400">عرض وإدارة حسابات مديري النظام</p>
+        </div>
+        <Button onClick={() => router.push('/admin/users/new')}>
+          <Plus className="h-4 w-4 me-2" />
+          إضافة مدير
+        </Button>
       </div>
 
       <Card className="bg-slate-800/50 border-slate-700">
@@ -102,6 +133,7 @@ export default function AdminUsersPage() {
                   <TableHead className="text-slate-400">الحالة</TableHead>
                   <TableHead className="text-slate-400">آخر دخول</TableHead>
                   <TableHead className="text-slate-400">تاريخ الإنشاء</TableHead>
+                  <TableHead className="text-slate-400">إجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -115,7 +147,7 @@ export default function AdminUsersPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={admin.isActive ? 'success' : 'destructive'}>
+                      <Badge variant={admin.isActive ? 'default' : 'destructive'}>
                         {admin.isActive ? 'نشط' : 'موقوف'}
                       </Badge>
                     </TableCell>
@@ -124,6 +156,28 @@ export default function AdminUsersPage() {
                     </TableCell>
                     <TableCell className="text-slate-300">
                       {formatDate(admin.createdAt)}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-slate-300 hover:text-white"
+                          onClick={() => router.push(`/admin/users/${admin.id}`)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        {admin.role !== 'SUPER_ADMIN' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-slate-300 hover:text-white"
+                            onClick={() => handleDelete(admin.id, admin.name)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
