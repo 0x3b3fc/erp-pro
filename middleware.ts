@@ -40,6 +40,7 @@ function getLocaleFromPath(pathname: string): string | null {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const hostname = request.headers.get('host') || '';
 
   // Admin routes use a separate auth flow and should not be localized.
   if (pathname.startsWith('/admin')) {
@@ -51,10 +52,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // First, handle intl
-  const intlResponse = intlMiddleware(request);
+  // Skip static files and Next.js internals
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon.ico') ||
+    pathname.match(/\.(ico|png|jpg|jpeg|svg|gif|webp|woff|woff2|ttf|eot)$/)
+  ) {
+    return NextResponse.next();
+  }
 
-  // Get locale from path
+  // Tenant subdomain is derived from host, but validation happens in server routes.
+  const subdomain = hostname.split('.')[0];
+
+  // Get locale from path first
   const locale = getLocaleFromPath(pathname) || defaultLocale;
   const pathnameWithoutLocale = getPathnameWithoutLocale(pathname);
 
@@ -62,9 +72,29 @@ export async function middleware(request: NextRequest) {
   const isPublicRoute = publicRoutes.some(route => pathnameWithoutLocale.startsWith(route));
   const isAuthRoute = authRoutes.some(route => pathnameWithoutLocale.startsWith(route));
 
-  // For public routes, just return intl response
+  // For protected routes, check authentication first (before intl middleware)
+  if (!isPublicRoute) {
+    const session = await auth();
+    const isAuthenticated = !!session?.user;
+
+    // Redirect unauthenticated users to login
+    if (!isAuthenticated && pathnameWithoutLocale !== '/') {
+      const url = request.nextUrl.clone();
+      url.pathname = `/${locale}/login`;
+      url.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(url);
+    }
+
+    // Redirect root to dashboard or login
+    if (pathnameWithoutLocale === '/') {
+      const url = request.nextUrl.clone();
+      url.pathname = `/${locale}/${isAuthenticated ? 'dashboard' : 'login'}`;
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // For public routes, check if authenticated and redirect away from auth pages
   if (isPublicRoute) {
-    // Get session to check if we should redirect auth routes
     const session = await auth();
     const isAuthenticated = !!session?.user;
 
@@ -74,27 +104,14 @@ export async function middleware(request: NextRequest) {
       url.pathname = `/${locale}/dashboard`;
       return NextResponse.redirect(url);
     }
-
-    return intlResponse;
   }
 
-  // For protected routes, check authentication
-  const session = await auth();
-  const isAuthenticated = !!session?.user;
-
-  // Redirect unauthenticated users to login
-  if (!isAuthenticated && pathnameWithoutLocale !== '/') {
-    const url = request.nextUrl.clone();
-    url.pathname = `/${locale}/login`;
-    url.searchParams.set('callbackUrl', pathname);
-    return NextResponse.redirect(url);
-  }
-
-  // Redirect root to dashboard or login
-  if (pathnameWithoutLocale === '/') {
-    const url = request.nextUrl.clone();
-    url.pathname = `/${locale}/${isAuthenticated ? 'dashboard' : 'login'}`;
-    return NextResponse.redirect(url);
+  // Finally, handle intl middleware (must be last to handle routing)
+  const intlResponse = intlMiddleware(request);
+  
+  // Add subdomain header for downstream handlers, if needed.
+  if (subdomain && intlResponse instanceof NextResponse) {
+    intlResponse.headers.set('x-tenant-subdomain', subdomain);
   }
 
   return intlResponse;
