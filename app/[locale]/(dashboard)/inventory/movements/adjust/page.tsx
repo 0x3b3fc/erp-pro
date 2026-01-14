@@ -276,18 +276,20 @@ export default function StockAdjustmentPage() {
           {/* Warehouse Selection */}
           <div>
             <Label>المخزن *</Label>
-            <Select value={warehouseId} onValueChange={setWarehouseId} className="mt-1">
-              <SelectTrigger>
-                <SelectValue placeholder="اختر المخزن..." />
-              </SelectTrigger>
-              <SelectContent>
-                {warehouses.map((wh) => (
-                  <SelectItem key={wh.id} value={wh.id}>
-                    {wh.nameAr} ({wh.code})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="mt-1">
+              <Select value={warehouseId} onValueChange={setWarehouseId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر المخزن..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {warehouses.map((wh) => (
+                    <SelectItem key={wh.id} value={wh.id}>
+                      {wh.nameAr} ({wh.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Current Stock Info */}

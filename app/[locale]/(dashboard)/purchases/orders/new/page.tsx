@@ -55,6 +55,7 @@ interface Warehouse {
   code: string;
   nameAr: string;
   nameEn: string;
+  isDefault?: boolean;
 }
 
 interface OrderLine {

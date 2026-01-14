@@ -10,14 +10,14 @@ export default function DashboardLayout({
   return (
     <>
       <ImpersonationBar />
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
         {/* Sidebar */}
         <Sidebar />
 
         {/* Main content */}
         <div className="flex flex-1 flex-col md:ms-64">
           <Header />
-          <main className="flex-1 p-4 md:p-6">{children}</main>
+          <main className="flex-1">{children}</main>
         </div>
       </div>
     </>

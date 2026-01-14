@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { ArrowRight, Plus, Trash2, Save, Search } from 'lucide-react';
+import { ArrowRight, Plus, Trash2, Save, Search, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -66,6 +66,7 @@ interface Warehouse {
   code: string;
   nameAr: string;
   nameEn: string;
+  isDefault?: boolean;
 }
 
 interface BillLine {
@@ -81,7 +82,7 @@ interface BillLine {
   total: number;
 }
 
-export default function NewPurchaseBillPage() {
+function NewPurchaseBillContent() {
   const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -437,23 +438,24 @@ export default function NewPurchaseBillPage() {
               {selectedSupplier && purchaseOrders.length > 0 && (
                 <div>
                   <Label>ربط بأمر شراء (اختياري)</Label>
-                  <Select
-                    value={purchaseOrderId}
-                    onValueChange={setPurchaseOrderId}
-                    className="mt-1"
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر أمر شراء..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">لا يوجد</SelectItem>
-                      {purchaseOrders.map((po) => (
-                        <SelectItem key={po.id} value={po.id}>
-                          {po.poNumber} - {formatCurrency(Number(po.total))}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="mt-1">
+                    <Select
+                      value={purchaseOrderId}
+                      onValueChange={setPurchaseOrderId}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر أمر شراء..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">لا يوجد</SelectItem>
+                        {purchaseOrders.map((po) => (
+                          <SelectItem key={po.id} value={po.id}>
+                            {po.poNumber} - {formatCurrency(Number(po.total))}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -714,5 +716,17 @@ export default function NewPurchaseBillPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function NewPurchaseBillPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    }>
+      <NewPurchaseBillContent />
+    </Suspense>
   );
 }

@@ -11,7 +11,7 @@ const updateTenantSchema = z.object({
   name: z.string().min(1).optional(),
   subdomain: z.string().min(1).regex(/^[a-z0-9-]+$/).optional(),
   planType: z.enum(['STARTER', 'GROWTH', 'BUSINESS', 'ENTERPRISE']).optional(),
-  status: z.enum(['ACTIVE', 'SUSPENDED', 'CANCELLED', 'TRIAL']).optional(),
+  status: z.enum(['ACTIVE', 'SUSPENDED', 'CANCELLED']).optional(),
 });
 
 // GET - Get single tenant

@@ -45,7 +45,6 @@ export default function AdminDetailsPage({ params }: { params: Promise<{ id: str
         const id = resolvedParams.id;
         setAdminId(id);
 
-      try {
         const res = await fetch(`/api/admin/admins/${id}`);
         const data = await res.json();
 
@@ -62,6 +61,7 @@ export default function AdminDetailsPage({ params }: { params: Promise<{ id: str
           router.push('/admin/users');
         }
       } catch (error) {
+        console.error('Error loading admin:', error);
         toast.error('حدث خطأ');
         router.push('/admin/users');
       } finally {
@@ -70,7 +70,7 @@ export default function AdminDetailsPage({ params }: { params: Promise<{ id: str
     };
 
     loadAdmin();
-  }, []);
+  }, [params, router]);
 
   const handleSave = async () => {
     setSaving(true);

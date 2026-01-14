@@ -238,7 +238,6 @@ export async function POST(request: NextRequest) {
         subtotal,
         vatAmount: totalVat,
         total,
-        notes: data.notes,
         status: 'DRAFT',
         createdBy: userId,
         lines: {

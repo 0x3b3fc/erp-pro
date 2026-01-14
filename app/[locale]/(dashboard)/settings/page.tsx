@@ -61,6 +61,17 @@ interface NotificationSettings {
     whatsappEnabled: boolean;
 }
 
+interface User {
+    id: string;
+    email: string;
+    nameAr: string;
+    nameEn: string;
+    role: string;
+    isActive: boolean;
+    lastLoginAt: string | null;
+    createdAt: string;
+}
+
 export default function SettingsPage() {
     const t = useTranslations();
     const locale = useLocale();
@@ -69,6 +80,10 @@ export default function SettingsPage() {
     const [saving, setSaving] = useState(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+    // Users state
+    const [users, setUsers] = useState<User[]>([]);
+    const [loadingUsers, setLoadingUsers] = useState(false);
 
     // Company settings state
     const [companySettings, setCompanySettings] = useState<CompanySettings>({
@@ -103,6 +118,22 @@ export default function SettingsPage() {
         budgetAlerts: false,
         whatsappEnabled: false,
     });
+
+    // Fetch users
+    const fetchUsers = async () => {
+        setLoadingUsers(true);
+        try {
+            const res = await fetch('/api/v1/settings/users');
+            const result = await res.json();
+            if (result.data) {
+                setUsers(result.data);
+            }
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        } finally {
+            setLoadingUsers(false);
+        }
+    };
 
     // Fetch company settings on mount
     useEffect(() => {
@@ -144,6 +175,7 @@ export default function SettingsPage() {
         };
 
         fetchSettings();
+        fetchUsers();
     }, [locale]);
 
     const tabs = [
@@ -624,6 +656,21 @@ export default function SettingsPage() {
         </div>
     );
 
+    const getRoleLabel = (role: string) => {
+        const labels: Record<string, { ar: string; en: string }> = {
+            SUPER_ADMIN: { ar: 'مالك النظام', en: 'Super Admin' },
+            ADMIN: { ar: 'مدير', en: 'Admin' },
+            ACCOUNTANT: { ar: 'محاسب', en: 'Accountant' },
+            SALES: { ar: 'مبيعات', en: 'Sales' },
+            PURCHASE: { ar: 'مشتريات', en: 'Purchase' },
+            INVENTORY: { ar: 'مخازن', en: 'Inventory' },
+            HR: { ar: 'موارد بشرية', en: 'HR' },
+            POS: { ar: 'نقاط البيع', en: 'POS' },
+            USER: { ar: 'مستخدم', en: 'User' },
+        };
+        return labels[role]?.[locale === 'ar' ? 'ar' : 'en'] || role;
+    };
+
     const renderUsersSettings = () => (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -641,35 +688,46 @@ export default function SettingsPage() {
 
             <Card>
                 <CardContent className="p-0">
-                    <div className="divide-y">
-                        {[
-                            { name: 'أحمد محمد', email: 'ahmed@company.com', role: 'admin', status: 'active' },
-                            { name: 'سارة علي', email: 'sara@company.com', role: 'accountant', status: 'active' },
-                            { name: 'محمد إبراهيم', email: 'mohamed@company.com', role: 'sales', status: 'active' },
-                        ].map((user, index) => (
-                            <div key={index} className="flex items-center justify-between p-4 hover:bg-muted/50">
-                                <div className="flex items-center gap-4">
-                                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                        <span className="text-sm font-medium text-primary">{user.name.charAt(0)}</span>
+                    {loadingUsers ? (
+                        <div className="flex items-center justify-center py-8">
+                            <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+                        </div>
+                    ) : users.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                            {locale === 'ar' ? 'لا يوجد مستخدمين' : 'No users found'}
+                        </div>
+                    ) : (
+                        <div className="divide-y">
+                            {users.map((user) => (
+                                <div key={user.id} className="flex items-center justify-between p-4 hover:bg-muted/50">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`h-10 w-10 rounded-full flex items-center justify-center ${user.isActive ? 'bg-primary/10' : 'bg-muted'}`}>
+                                            <span className={`text-sm font-medium ${user.isActive ? 'text-primary' : 'text-muted-foreground'}`}>
+                                                {user.nameAr?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <p className="font-medium">{locale === 'ar' ? user.nameAr : user.nameEn || user.nameAr}</p>
+                                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="font-medium">{user.name}</p>
-                                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                                    <div className="flex items-center gap-4">
+                                        {!user.isActive && (
+                                            <Badge variant="secondary" className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                                                {locale === 'ar' ? 'غير نشط' : 'Inactive'}
+                                            </Badge>
+                                        )}
+                                        <Badge variant={user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' ? 'default' : 'secondary'}>
+                                            {getRoleLabel(user.role)}
+                                        </Badge>
+                                        <Button variant="ghost" size="sm">
+                                            <ChevronRight className="h-4 w-4" />
+                                        </Button>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4">
-                                    <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                                        {user.role === 'admin' && (locale === 'ar' ? 'مدير' : 'Admin')}
-                                        {user.role === 'accountant' && (locale === 'ar' ? 'محاسب' : 'Accountant')}
-                                        {user.role === 'sales' && (locale === 'ar' ? 'مبيعات' : 'Sales')}
-                                    </Badge>
-                                    <Button variant="ghost" size="sm">
-                                        <ChevronRight className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 
@@ -680,19 +738,19 @@ export default function SettingsPage() {
                 <CardContent>
                     <div className="grid gap-4 md:grid-cols-2">
                         {[
-                            { role: 'admin', label: locale === 'ar' ? 'مدير' : 'Admin', desc: locale === 'ar' ? 'صلاحيات كاملة' : 'Full access' },
-                            { role: 'accountant', label: locale === 'ar' ? 'محاسب' : 'Accountant', desc: locale === 'ar' ? 'المالية والتقارير' : 'Finance & Reports' },
-                            { role: 'sales', label: locale === 'ar' ? 'مبيعات' : 'Sales', desc: locale === 'ar' ? 'المبيعات والعملاء' : 'Sales & Customers' },
-                            { role: 'viewer', label: locale === 'ar' ? 'مشاهد' : 'Viewer', desc: locale === 'ar' ? 'عرض فقط' : 'View only' },
+                            { role: 'ADMIN', label: locale === 'ar' ? 'مدير' : 'Admin', desc: locale === 'ar' ? 'صلاحيات كاملة' : 'Full access' },
+                            { role: 'ACCOUNTANT', label: locale === 'ar' ? 'محاسب' : 'Accountant', desc: locale === 'ar' ? 'المالية والتقارير' : 'Finance & Reports' },
+                            { role: 'SALES', label: locale === 'ar' ? 'مبيعات' : 'Sales', desc: locale === 'ar' ? 'المبيعات والعملاء' : 'Sales & Customers' },
+                            { role: 'INVENTORY', label: locale === 'ar' ? 'مخازن' : 'Inventory', desc: locale === 'ar' ? 'إدارة المخزون' : 'Inventory Management' },
+                            { role: 'PURCHASE', label: locale === 'ar' ? 'مشتريات' : 'Purchase', desc: locale === 'ar' ? 'إدارة المشتريات' : 'Purchase Management' },
+                            { role: 'USER', label: locale === 'ar' ? 'مستخدم' : 'User', desc: locale === 'ar' ? 'صلاحيات محدودة' : 'Limited access' },
                         ].map((item) => (
                             <div key={item.role} className="flex items-center justify-between p-4 border rounded-lg">
                                 <div>
                                     <p className="font-medium">{item.label}</p>
                                     <p className="text-sm text-muted-foreground">{item.desc}</p>
                                 </div>
-                                <Button variant="outline" size="sm">
-                                    {locale === 'ar' ? 'تعديل' : 'Edit'}
-                                </Button>
+                                <Badge variant="outline">{users.filter(u => u.role === item.role).length}</Badge>
                             </div>
                         ))}
                     </div>
