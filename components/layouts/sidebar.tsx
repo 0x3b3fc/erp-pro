@@ -57,6 +57,7 @@ export function Sidebar() {
       icon: <Receipt className="h-5 w-5" />,
       children: [
         { title: t('invoices'), href: `/${locale}/sales/invoices` },
+        { title: t('quotations'), href: `/${locale}/sales/quotations` },
         { title: t('customers'), href: `/${locale}/sales/customers` },
         { title: t('receipts'), href: `/${locale}/sales/receipts` },
       ],
@@ -106,6 +107,9 @@ export function Sidebar() {
         { title: t('trialBalance'), href: `/${locale}/reports/trial-balance` },
         { title: t('incomeStatement'), href: `/${locale}/reports/income-statement` },
         { title: t('balanceSheet'), href: `/${locale}/reports/balance-sheet` },
+        { title: t('cashFlow'), href: `/${locale}/reports/cash-flow` },
+        { title: t('aging'), href: `/${locale}/reports/aging` },
+        { title: t('inventoryMovement'), href: `/${locale}/reports/inventory-movement` },
       ],
     },
     {
@@ -171,7 +175,7 @@ export function Sidebar() {
                             className={cn(
                               'block rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground',
                               isActive(child.href) &&
-                                'bg-primary/10 text-primary font-medium'
+                              'bg-primary/10 text-primary font-medium'
                             )}
                           >
                             {child.title}
