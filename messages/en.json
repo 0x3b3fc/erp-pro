@@ -77,6 +77,8 @@
     "leaves": "Leaves",
     "reports": "Reports",
     "financialReports": "Financial Reports",
+    "incomeStatement": "Income Statement",
+    "balanceSheet": "Balance Sheet",
     "salesReports": "Sales Reports",
     "inventoryReports": "Inventory Reports",
     "hrReports": "HR Reports",
